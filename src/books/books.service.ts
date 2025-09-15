@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { Book, Language } from './entities/book.entity';
 import { CreateBookDto } from './dto/create-book.dto';
 import { UpdateBookDto } from './dto/update-book.dto';
+import { GetBookFilterDto } from './dto/get-book-filter.dto';
 
 @Injectable()
 export class BooksService {
@@ -23,8 +24,30 @@ export class BooksService {
             language: Language.ENGLISH,
         }
     ]
-    findBooks() {
-        return this.books;
+    findBooks(query: GetBookFilterDto) {
+        const { search, language, author, publicationDate } = query;
+
+        let filteredBooks = [...this.books];
+
+        if (search) {
+            filteredBooks = filteredBooks.filter(book => book.title.toLowerCase().includes(search.toLowerCase()) ||
+                book.author.toLowerCase().includes(search.toLowerCase()));
+        }
+
+        if (language) {
+            filteredBooks = filteredBooks.filter(book => book.language === language);
+        }
+
+        if (author) {
+            filteredBooks = filteredBooks.filter(book => book.author.toLowerCase() === author.toLowerCase());
+        }
+
+        if (publicationDate) {
+            filteredBooks = filteredBooks.filter(book => book.publicationDate === publicationDate);
+        }
+
+
+        return filteredBooks;
     }
 
     createBook(data: CreateBookDto) {
